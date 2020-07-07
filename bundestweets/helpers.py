@@ -13,6 +13,7 @@ import time
 import os
 import re
 import unidecode
+import json
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -88,7 +89,7 @@ def get_API():
         consumer_secret = f.readline().splitlines()[0]
 
     auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
-    api = tweepy.API(auth)
+    api = tweepy.API(auth, wait_on_rate_limit_notify=True)
 
     return api
 
@@ -325,6 +326,39 @@ def greedy_record_linkage_bundestag(names_bundestag, party_bundestag, accounts_b
 
         members_bundestag[i_name] = member_info
 
+    return members_bundestag
+
+
+def get_data_twitter_members(do_fresh_download = True):
+    
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, 'data', 'twitter_members.json')
+    
+    if not do_fresh_download:
+        if not os.path.isfile(file_path):
+            print("File does not exist, trying to download data...")
+            do_fresh_download = True
+        else:
+            with open(file_path, 'r') as file:
+                members_bundestag = json.load(file)
+    
+    if do_fresh_download:
+        # get members and affiliations from the Bundestag
+        soup = scrape_bundestag_website()
+        names_bundestag, party_bundestag = soup_to_members(soup)
+
+        # initialize Twitter API
+        api = get_API()
+
+        # get list of Bundestag members with Twitter accounts from https://twitter.com/i/lists/912241909002833921
+        accounts_bundestag = retrieve_accounts_bundestag(api)
+
+        # match Twitter accounts to real persons
+        members_bundestag = greedy_record_linkage_bundestag(names_bundestag, party_bundestag, accounts_bundestag)
+        
+        with open(file_path, 'w') as file:
+            json.dump(members_bundestag, file)
+        
     return members_bundestag
 
 
