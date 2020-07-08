@@ -7,27 +7,35 @@ from tqdm import tqdm
 from bundestweets import helpers
 import pandas as pd
 import time
+import argparse
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--start_index", type=int,
+                    help="start index")
+parser.add_argument("--since_date", type=str,
+                    help="start date")
+parser.add_argument("--file", type=str,
+                    help="database filename")
+
+args = parser.parse_args()
+
 
 def main():
-
-    # get start index
-    if len(sys.argv)>1:
-        start_index = int(sys.argv[1])
-    else:
-        start_index = 0
+    
+    start_index = 0
+    since_date = '2018-01-01'
+    filename = 'tweets_data.db'
+    
+    if args.start_index:
+        start_index = int(args.start_index)
+    if args.since_date:
+        since_date = str(args.since_date)
+    if args.file:
+        filename = str(args.file)
         
-    # get since date
-    if len(sys.argv)>2:
-        since_date = str(sys.argv[2])
-    else:
-        since_date = '2018-01-01'
     print(f"Scraping tweets since {since_date}")
-        
-    # get database filename
-    if len(sys.argv)>3:
-        filename = str(sys.argv[3])
-    else:
-        filename = 'tweets_data.db'
     print(f"Saving to database {filename}")
    
     # get members of Bundestag
