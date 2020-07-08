@@ -14,6 +14,7 @@ import os
 import re
 import unidecode
 import json
+import pandas as pd
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -330,6 +331,14 @@ def greedy_record_linkage_bundestag(names_bundestag, party_bundestag, accounts_b
 
 
 def get_data_twitter_members(do_fresh_download = True):
+    '''Downloads or loads from file the Twitter account data for each member
+
+    Args:
+        do_fresh_download (bool): Whether or not to scrape the data from the internet
+
+    Returns:
+        members_bundestag (dict): Twitter account data for each member
+    '''
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     file_path = os.path.join(dir_path, 'data', 'twitter_members.json')
@@ -353,7 +362,7 @@ def get_data_twitter_members(do_fresh_download = True):
         # get list of Bundestag members with Twitter accounts from https://twitter.com/i/lists/912241909002833921
         accounts_bundestag = retrieve_accounts_bundestag(api)
 
-        # match Twitter accounts to real persons
+        # match Twitter accounts to real persons / link party affiliation
         members_bundestag = greedy_record_linkage_bundestag(names_bundestag, party_bundestag, accounts_bundestag)
         
         with open(file_path, 'w') as file:
