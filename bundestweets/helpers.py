@@ -15,6 +15,7 @@ import re
 import unidecode
 import json
 import pandas as pd
+import sqlite3
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -369,5 +370,76 @@ def get_data_twitter_members(do_fresh_download = True):
             json.dump(members_bundestag, file)
         
     return members_bundestag
+
+
+def create_tweet_database(filename="tweets_data.db"):
+    '''Creates a SQL database for tweets
+
+    Args:
+        filename: Filename for the database
+    '''
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, filename)
+
+    conn = sqlite3.connect(file_path)
+
+    cur = conn.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS tweets ('
+                'id INT PRIMARY KEY,'
+                'permalink TEXT,'
+                'username TEXT,'
+                'resp_to TEXT,'
+                'text TEXT,'
+                'date TEXT,'
+                'retweets INT,'
+                'favorites INT,'
+                'mentions TEXT,'
+                'hashtags TEXT)')
+
+    conn.close()
+
+
+def extend_tweet_database(data, filename="tweets_data.db"):
+    '''Extends the SQL Tweet database using new data.
+
+    Args:
+        data (list): List of new tweets to add
+        filename: Filename of the database file
+    '''
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, filename)
+
+    conn = sqlite3.connect(file_path)
+    cur = conn.cursor()
+
+    for tweet in data:
+        cur.execute("""INSERT OR IGNORE INTO tweets(
+                            id, 
+                            permalink, 
+                            username, 
+                            resp_to, 
+                            text, 
+                            date, 
+                            retweets, 
+                            favorites, 
+                            mentions, 
+                            hashtags) 
+
+                   VALUES (?,?,?,?,?,?,?,?,?,?);""", (
+            tweet['id'],
+            str(tweet['permalink']),
+            str(tweet['username']),
+            str(tweet['to']),
+            str(tweet['text']),
+            str(tweet['date']),
+            tweet['retweets'],
+            tweet['favorites'],
+            str(tweet['mentions']),
+            str(tweet['hashtags'])))
+
+    conn.commit()
+    conn.close()
 
 
