@@ -1,0 +1,7 @@
+pandas
+GetOldTweets3
+tweepy
+beautifulsoup4
+unidecode
+tqdm
+selenium
