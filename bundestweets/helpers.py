@@ -201,27 +201,6 @@ def deEmojify(text):
     return regrex_pattern.sub(r'', text)
 
 
-def deEmojify(text):
-    '''Remove Emojis from a text.
-    Source: https://stackoverflow.com/questions/33404752/removing-emojis-from-a-string-in-python
-
-    Args:
-        text: input string
-
-    Returns:
-        Emoji-free string
-    '''
-
-    regrex_pattern = re.compile(pattern="["
-                                        u"\U0001F600-\U0001F64F"  # emoticons
-                                        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                                        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                                        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                                        "]+", flags=re.UNICODE)
-
-    return regrex_pattern.sub(r'', text)
-
-
 def tokenize_real_names(real_names):
     '''Splits real names into first and last names and standardizes them for comparison with twitter names.
 
@@ -380,7 +359,7 @@ def create_tweet_database(filename="tweets_data.db"):
     '''
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, filename)
+    file_path = os.path.join(dir_path, 'data', filename)
 
     conn = sqlite3.connect(file_path)
 
@@ -409,7 +388,7 @@ def extend_tweet_database(data, filename="tweets_data.db"):
     '''
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, filename)
+    file_path = os.path.join(dir_path, 'data', filename)
 
     conn = sqlite3.connect(file_path)
     cur = conn.cursor()
