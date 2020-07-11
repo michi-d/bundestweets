@@ -12,7 +12,6 @@ import altair as alt
 import numpy as np
 import streamlit as st
 import time
-from vega_datasets import data
 import sqlite3 
 
 import bundestweets.helpers as helpers
