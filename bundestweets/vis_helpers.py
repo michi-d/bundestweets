@@ -118,6 +118,10 @@ def get_member_stats(content_tweets):
     # count tweets per member
     member_stats = content_tweets.groupby(['real_name', 'party']).id.count().to_frame().reset_index()
     member_stats.columns = ['name', 'party', 'count']
+    
+    # calculate tweet count as fraction of total tweets
+    member_stats.loc[:, 'fraction'] = (member_stats.loc[:, 'count']/member_stats.loc[:, 'count'].sum())
+    
     member_stats = member_stats.sort_values(by='count', ascending=False)
     
     return member_stats
