@@ -12,7 +12,6 @@ import altair as alt
 import numpy as np
 import streamlit as st
 import time
-from vega_datasets import data
 import sqlite3 
 
 import bundestweets.helpers as helpers
@@ -91,7 +90,19 @@ top_head = st.selectbox(
     'Select top ...',
      [10, 20, 30, 40, 50])
 
-chart_member_stats = alt.Chart(member_stats.head(top_head)).mark_bar().encode(
+perc_chart_member_tweets = alt.Chart(member_stats.head(top_head)).mark_bar(size=20).encode(
+    #y=alt.Y('party:N', axis=alt.Axis(title='')),
+    x=alt.X('sum(fraction):Q', stack='zero', axis=alt.Axis(title='fraction of all tweets', format='%'), 
+            scale=alt.Scale(domain=(0, 1))),
+    color=alt.Color("party:N", legend=None, scale=alt.Scale(domain=stats_helpers.party_list,
+                                               range=list(map(vis_helpers.map_color, stats_helpers.party_list))
+                                              ))
+).properties(width=600, height=80)
+
+perc_chart_member_tweets
+
+
+barchart_member_stats = alt.Chart(member_stats.head(top_head)).mark_bar().encode(
     y=alt.Y('name:N', axis=alt.Axis(title=''), sort='-x'),
     x=alt.X('count:Q', stack='zero', axis=alt.Axis(title='Tweet count', format='s')),
     color=alt.Color("party:N", scale=alt.Scale(domain=stats_helpers.party_list,
@@ -99,4 +110,4 @@ chart_member_stats = alt.Chart(member_stats.head(top_head)).mark_bar().encode(
                                               ))
 ).properties(width=600)
 
-chart_member_stats
+barchart_member_stats
