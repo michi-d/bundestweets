@@ -9,6 +9,7 @@ __email__ = "michaelsdrews@gmail.com"
 import pandas as pd
 import numpy as np
 import streamlit as st
+import os
 
 import time
 import sqlite3
@@ -33,7 +34,10 @@ def get_raw_data(do_fresh_download=False):
     members_bundestag = pd.DataFrame(members_bundestag).T
 
     # retrieve tweet data from SQL file
-    conn = sqlite3.connect("bundestweets/data/tweets_data.db")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, 'data', 'test_data.db')
+    
+    conn = sqlite3.connect(file_path)
     sql_data = pd.read_sql("SELECT * FROM tweets", conn)
     conn.close()
     
