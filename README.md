@@ -2,7 +2,7 @@
 
 An NLP side project focussing on the political tweet landscape of the German Bundestag. Goal is the development of a constantly updated social media monitor for the Bundestag. The project is constantly under development following agile principles, i.e. going through fast and iterative cycles of development and deployment.
 
-Data currently comprises all tweets from delegates of the German Bundestag over the last 2.5 years. For a sneak peek showing some basic statistics about the dataset, please have a look at https://bundestweets.herokuapp.com.
+Data currently comprises all tweets from delegates of the German Bundestag over the last 2.5 years. For a sneak peek showing some basic statistics about the dataset, please have a look at http://34.89.166.116.
  
 ## scrape_tweets.py
 
