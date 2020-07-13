@@ -4,7 +4,7 @@ An NLP side project with the goal to research the political tweet landscape of t
 
 Data currently comprises all tweets from delegates of the German Bundestag over the last 2.5 years. For a sneak peek showing some basic statistics about the dataset, please have a look at https://bundestweets.herokuapp.com.
  
-# scrape_tweets.py
+## scrape_tweets.py
 
 Simple command-line tool for scraping tweets from the German Bundestag for a side project. 
 
