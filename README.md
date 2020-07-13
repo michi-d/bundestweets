@@ -1,5 +1,11 @@
 # bundestweets
 
+An NLP side project focussing on the political tweet landscape of the German Bundestag. Goal is the development of a constantly updated social media monitor for the Bundestag. The project is constantly under development following agile principles, i.e. going through fast and iterative cycles of development and deployment.
+
+Data currently comprises all tweets from delegates of the German Bundestag over the last 2.5 years. For a sneak peek showing some basic statistics about the dataset, please have a look at https://bundestweets.herokuapp.com.
+ 
+## scrape_tweets.py
+
 Simple command-line tool for scraping tweets from the German Bundestag for a side project. 
 
 The Twitter API has strict limits on the rate of requests, rendering it difficult to scrape an interesting and large enough dataset for NLP research. Other tools (e.g. https://github.com/bisguzar/twitter-scraper) provide workarounds which avoid interaction with the API by scraping the frontend. These approaches, however, are limited to tweets from within the last 6 or 7 months. 
@@ -43,8 +49,3 @@ For later executions, a data file containing a list of members of the Bundestag 
 After downloading the repository run 
 
 `pip install -r requirements.txt`
-
-
-### Future work
-
-Future work will dive into web app development for data exploration and visualization, and NLP research to find statistical patterns in the political tweet space from the German Bundestag.
