@@ -15,16 +15,32 @@ import time
 import sqlite3
 import bundestweets.helpers as helpers
 import bundestweets.stats_helpers as stats_helpers
+from bundestweets.row_operators import * 
+
+import holoviews as hv
+from holoviews import opts as hv_opts
+from holoviews import dim as hv_dim
+hv.extension('bokeh')
+
+party_cmap = {
+    'SPD': 'red',
+    'CDU/CSU': 'black', 
+    'Die Linke': 'orchid',
+    'Bündnis 90/Die Grünen': 'limegreen', 
+    'AfD': 'steelblue',
+    'fraktionslos': 'gray',
+    'FDP': 'gold'
+}
 
 
 @st.cache
 def get_data():
-    '''Get all data from SQL file and filter for relevent tweets
+    """Get all data from SQL file and filter for relevent tweets
     
     Returns:
         df: DataFrame with raw data
         content_tweets: only tweets with text
-    '''
+    """
     # get all tweet date
     df = stats_helpers.get_raw_data()
     
@@ -36,35 +52,20 @@ def get_data():
 
 
 def map_color(party):
-    '''Color mapping for political parties
+    """Color mapping for political parties
     
     Args:
         party (str): Which party
         
     Returns:
         color (str): Which color
-    '''
-    if party == 'SPD':
-        color = 'red'
-    elif party == "CDU/CSU":
-        color = 'black'
-    elif party == 'Die Linke':
-        color = 'orchid'
-    elif party == 'Bündnis 90/Die Grünen':
-        color = 'limegreen'  
-    elif party == 'AfD':
-        color = 'steelblue'
-    elif party == 'fraktionslos':
-        color = 'gray'
-    elif party == 'FDP':
-        color = 'gold'
-        
-    return color
+    """
+    return party_cmap[party]
 
 
 @st.cache
 def get_monthly_stats(content_tweets):
-    '''Get monthly tweet count per party
+    """Get monthly tweet count per party
     
     Args:
         content_tweets: Non-empty tweets dataset
@@ -72,7 +73,7 @@ def get_monthly_stats(content_tweets):
     Returns:
         content_tweets: DataFrame 
         stats: DataFrame with columns (date, party, count)
-    '''
+    """
     # resample per month and count per party
     stats = content_tweets.set_index('date').resample('m')['party'].value_counts()
     stats = stats.to_frame(name='count').reset_index(['party'])
@@ -84,7 +85,7 @@ def get_monthly_stats(content_tweets):
 
 @st.cache
 def how_many_members(df):
-    '''Count representatives in Twitter or Parliament per Party
+    """Count representatives in Twitter or Parliament per Party
     
     Args:
         df: Basic dataset
@@ -92,7 +93,7 @@ def how_many_members(df):
     Returns:
         count: DataFrame with columns (where, party, count)
         
-    '''
+    """
     # Get twitter accounts / count per party
     twitter_accounts = df.loc[:, ['screen_name', 'party']].drop_duplicates().party.value_counts()
     
@@ -107,14 +108,14 @@ def how_many_members(df):
 
 @st.cache
 def get_member_stats(content_tweets):
-    '''Get some statistics on an individual level
+    """Get some statistics on an individual level
     
     Args:
         content_tweets: Non-empty tweets dataset
         
     Returns:
         member_stats: DataFrame with columns ('name', 'party', 'count')
-    '''
+    """
     # count tweets per member
     member_stats = content_tweets.groupby(['real_name', 'party']).id.count().to_frame().reset_index()
     member_stats.columns = ['name', 'party', 'count']
@@ -125,3 +126,78 @@ def get_member_stats(content_tweets):
     member_stats = member_stats.sort_values(by='count', ascending=False)
     
     return member_stats
+
+
+@st.cache
+def get_responses_count(data):
+    """
+    
+    Args:
+        data: Tweets dataset
+    """
+    
+    # get mappings between names, parties and indexes
+    df_name_party = data[['screen_name', 'real_name', 'party']].drop_duplicates().sort_values(by='party')
+    set_of_names = set(df_name_party['screen_name'])
+
+    name_to_party = dict(zip(df_name_party['screen_name'], df_name_party['party']))
+    name_to_realname = dict(zip(df_name_party['screen_name'], df_name_party['real_name']))
+
+    # give integer indexes to each name
+    name_to_index = dict(zip(df_name_party['screen_name'], range(len(df_name_party))))
+    index_to_name = {v:k for (k,v) in name_to_index.items()}
+    
+    # get only those tweets which are responses to other parliaments nembers
+    masked_names = data.loc[:, 'resp_to'].apply(lambda row: row if (str(row) in set_of_names) else False)
+    responding_tweets = data.loc[masked_names != False, :]
+
+    # count responses between people
+    responses_count = responding_tweets.groupby(['screen_name'])['resp_to'].value_counts()
+    responses_count.name = 'count'
+    responses_count = responses_count.reset_index()
+
+    # filter out self-responses
+    responses_count = responses_count.loc[responses_count.loc[:, 'screen_name'] != responses_count.loc[:, 'resp_to'], :]
+    
+    # generate new parameter columns for the plotting function
+    responses_count['party'] = responses_count['screen_name'].apply(lambda row: name_to_party[row])
+    responses_count['real_name'] = responses_count['screen_name'].apply(lambda row: name_to_realname[row])
+    responses_count['index'] = responses_count['screen_name'].apply(lambda row: name_to_index[row])
+    responses_count['target'] = responses_count['resp_to'].apply(lambda row: name_to_index[row])
+    responses_count['target_party'] = responses_count['resp_to'].apply(lambda row: name_to_party[row])
+    responses_count = responses_count.sort_values(by='party')
+    
+    return responses_count
+
+
+@st.cache
+def generate_chord_diagram(responses_count):
+    
+    # generate dataframes as required for the plotting function
+    plot_data = responses_count.loc[responses_count['count']>0, ['index', 'target', 'count']]
+    plot_data.columns = ['source', 'target', 'value']
+    plot_data.index = np.arange(len(plot_data))
+    
+    nodes = responses_count.loc[responses_count['count']>0, ['index', 'screen_name', 'party']].\
+                            drop_duplicates().set_index('index').sort_index(level=0)
+    nodes = hv.Dataset(nodes, 'index')
+    nodes.data.head()
+
+    # generate colormap for single accounts according to party affiliations
+    person_party_cmap = dict(zip(responses_count['index'], responses_count['party'].apply(lambda row: party_cmap[row])))
+    
+    # generae plot
+    chord = hv.Chord((plot_data, nodes)).select(value=(10, None))
+    chord.opts(
+        hv_opts.Chord(cmap=party_cmap, 
+                   edge_cmap=person_party_cmap, 
+                   edge_color=hv_dim('source'), 
+                   labels='screen_name', 
+                   node_color=hv_dim('party'), 
+                   edge_hover_line_color='cyan',
+                   node_hover_fill_color='cyan',
+                   height=700,
+                   width=700))
+    
+    return chord
+

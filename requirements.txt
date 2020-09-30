@@ -1,8 +1,9 @@
-pandas
-GetOldTweets3
-tweepy
-beautifulsoup4
+pandas==1.0.5
+GetOldTweets3==0.0.11
+tweepy==3.8.0
+beautifulsoup4==4.9.1
 unidecode
-tqdm
-selenium
-streamlit
+tqdm==4.47.0
+selenium==3.141.0
+streamlit==0.62.1
+holoviews=1.13.4

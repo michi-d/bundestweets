@@ -19,7 +19,7 @@ import bundestweets.helpers as helpers
 party_list = ['CDU/CSU', 'SPD', 'Bündnis 90/Die Grünen', 'FDP', 'Die Linke', 'AfD', 'fraktionslos'] 
 
 
-def get_raw_data(do_fresh_download=False):
+def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
     '''Get basic dataset of all members and together with their tweets
     
     Args:
@@ -35,7 +35,7 @@ def get_raw_data(do_fresh_download=False):
 
     # retrieve tweet data from SQL file
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'data', 'tweets_data.db')
+    file_path = os.path.join(dir_path, 'data', db_file)
     
     conn = sqlite3.connect(file_path)
     sql_data = pd.read_sql("SELECT * FROM tweets", conn)
