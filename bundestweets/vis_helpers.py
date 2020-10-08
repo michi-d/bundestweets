@@ -42,7 +42,7 @@ def get_data():
         content_tweets: only tweets with text
     """
     # get all tweet date
-    df = stats_helpers.get_raw_data()
+    df = stats_helpers.get_raw_data(db_file='bundestweets/data/tweets_data.db')
     
     # get non-empty tweets (only with text content)
     content_tweets = df.loc[~df.text.isna(), :]

@@ -34,18 +34,30 @@ def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
     members_bundestag = pd.DataFrame(members_bundestag).T
 
     # retrieve tweet data from SQL file
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'data', db_file)
-    
-    conn = sqlite3.connect(file_path)
-    sql_data = pd.read_sql("SELECT * FROM tweets", conn)
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    #file_path = os.path.join(dir_path, 'data', db_file)
+        
+    conn = sqlite3.connect(db_file)
+    df = pd.read_sql("SELECT * FROM tweets", conn)
     conn.close()
     
     # merge members with corresponding tweets
     person = members_bundestag.loc[:, ['real_name', 'party', 'screen_name']]
-    df = person.merge(sql_data, how='left', left_on='screen_name', right_on='username')
 
+    username2realname = {k: v for (k,v) in zip(person.screen_name, person.real_name)}
+    username2party = {k: v for (k,v) in zip(person.screen_name, person.party)}
+
+    real_name = df.username.map(username2realname)
+    party = df.username.map(username2party)
+
+    df['real_name'] = real_name
+    df['party'] = party
+
+    # delete historical members
     mask = df.party.apply(lambda row: '*' not in row)
     df = df.loc[mask, :]
+
+    # rename username to screen_name
+    df.rename(columns={"username": "screen_name"}, inplace=True)
     
     return df
