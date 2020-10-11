@@ -22,6 +22,10 @@ from holoviews import opts as hv_opts
 from holoviews import dim as hv_dim
 hv.extension('bokeh')
 
+from wordcloud import WordCloud
+from matplotlib.colors import to_rgba
+from matplotlib.colors import LinearSegmentedColormap
+
 party_cmap = {
     'SPD': 'red',
     'CDU/CSU': 'black', 
@@ -34,7 +38,7 @@ party_cmap = {
 
 
 @st.cache
-def get_data():
+def get_data(db_file='bundestweets/data/tweets_data.db'):
     """Get all data from SQL file and filter for relevent tweets
     
     Returns:
@@ -42,11 +46,11 @@ def get_data():
         content_tweets: only tweets with text
     """
     # get all tweet date
-    df = stats_helpers.get_raw_data(db_file='bundestweets/data/tweets_data.db')
+    df = stats_helpers.get_raw_data(db_file=db_file)
     
     # get non-empty tweets (only with text content)
     content_tweets = df.loc[~df.text.isna(), :]
-    content_tweets.loc[:, 'date'] = pd.to_datetime(content_tweets.date, format='%Y-%m-%d-%H-%M-%S')
+    #content_tweets.loc[:, 'date'] = pd.to_datetime(content_tweets.date, format='%Y-%m-%d-%H-%M-%S')
     
     return df, content_tweets
 
@@ -98,8 +102,13 @@ def how_many_members(df):
     twitter_accounts = df.loc[:, ['screen_name', 'party']].drop_duplicates().party.value_counts()
     
     # Get seats in parliament / count per party
-    bundestag_seats = df.loc[:, ['real_name', 'party']].drop_duplicates().party.value_counts()
-    
+    #bundestag_seats = df.loc[:, ['real_name', 'party']].drop_duplicates().party.value_counts()
+    members_bundestag = helpers.get_data_twitter_members(do_fresh_download=False)
+    members_bundestag = pd.DataFrame(members_bundestag).T
+    mask = members_bundestag.party.apply(lambda row: '*' not in row) # delete historical members
+    members_bundestag = members_bundestag.loc[mask, :]
+    bundestag_seats = members_bundestag.loc[:, ['real_name', 'party']].drop_duplicates().party.value_counts()
+
     count = pd.concat([twitter_accounts, bundestag_seats], keys=['Twitter', 'Bundestag'])
     count = count.to_frame().reset_index()
     count.columns = ['where', 'party', 'count']
@@ -201,3 +210,33 @@ def generate_chord_diagram(responses_count):
     
     return chord
 
+
+def create_word_cloud(party_word_importance, party):
+    """Creates a word cloud image for one party
+    
+    Args:
+        party_word_importance: Dictionary containing the word scores for all parties
+        party: Selected party
+        
+    Returns:
+        wordcloud: Wordcloud
+    """
+
+    word_freq = party_word_importance[party]
+
+    color = to_rgba(party_cmap[party])
+    cdict = {'red':   [(0.0,  0.0, color[0]*0.5),
+                       (1.0,  color[0]*1.0, 0.0)],
+             'green': [(0.0,  0.0, color[1]*0.5),
+                       (1.0,  color[1]*1.0, 0.0)],
+             'blue':  [(0.0,  0.0, color[2]*0.5),
+                       (1.0,  color[2]*1.0, 0.0)]}
+    newcmp = LinearSegmentedColormap('newCmap', segmentdata=cdict, N=256)
+
+
+    wordcloud = WordCloud(background_color="white", random_state=0,
+                          width=800, height=400, max_words=40, max_font_size=60, relative_scaling=0.5,
+                          prefer_horizontal=1.0, colormap=newcmp)
+    wordcloud = wordcloud.generate_from_frequencies(frequencies=word_freq)
+    
+    return wordcloud

@@ -16,6 +16,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 from collections import defaultdict
 import pandas as pd
@@ -31,7 +32,6 @@ party2id = {'CDU/CSU': 0,
             'fraktionslos': 6}
 
 id2party = {v: k for (k,v) in party2id.items()}
-
 
 
 def clean_and_stem_tweet(text):
@@ -176,6 +176,8 @@ def perform_party_regression_analysis(data, verbose=0):
     Returns:
         model: Fitted model
         vectorizer: Fitted vectorizer
+        train_acc: Train accuracy
+        test_acc: Test accuracy
     """
     
     # generate label-encoded column for party affiliation
@@ -193,22 +195,22 @@ def perform_party_regression_analysis(data, verbose=0):
         print(f"Working with {x_train.shape[1]} features.")
     
     # fit model
-    model = LogisticRegression(random_state=0)
+    model = LogisticRegression(random_state=0, C=0.1)
     if verbose:
         print(f"Fitting model ...")
     model.fit(x_train, y_train)
 
     y_test_pred = model.predict(x_test)
-    test_acc = model.score(x_test, y_test_pred)
+    test_acc = accuracy_score(y_test, y_test_pred)
     
     y_train_pred = model.predict(x_train)
-    train_acc = model.score(x_train, y_train_pred)
+    train_acc = accuracy_score(y_train, y_train_pred)
     
     if verbose:
         print(f'Train acccuracy: {train_acc}')
         print(f'Test acccuracy: {test_acc}')
 
-    return model, vectorizer
+    return model, vectorizer, train_acc, test_acc
 
 
 def get_top_n_words_from_model(model, vectorizer, category, n, translation_set, stemming=True):
@@ -255,9 +257,11 @@ def get_all_top_n_words(data, translation_set, n=40, verbose=0):
     Returns:
         party_word_importance: A dictionary containing a dictionary mapping words
             to importance values for each party.
+        train_acc: Train accuracy
+        test_acc: Test accuracy
     """
     
-    model, vectorizer = perform_party_regression_analysis(data, verbose=verbose)
+    model, vectorizer, train_acc, test_acc = perform_party_regression_analysis(data, verbose=verbose)
     
     party_word_importance = dict()
     for party in party2id.keys():
@@ -265,4 +269,4 @@ def get_all_top_n_words(data, translation_set, n=40, verbose=0):
         word_importance = {k:v for (k,v) in zip(words, importance)}
         party_word_importance[party] = word_importance
     
-    return party_word_importance
+    return party_word_importance, train_acc, test_acc

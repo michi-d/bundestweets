@@ -9,6 +9,7 @@ import argparse
 import bundestweets.stats_helpers as stats_helpers
 import bundestweets.nlp as my_nlp
 import sqlite3
+import json
 
 
 parser = argparse.ArgumentParser()
@@ -24,7 +25,11 @@ def main():
     # preprocess
     data, translation_set = my_nlp.preprocess_for_nlp(data)
     
-    # open file
+    # save translation set
+    with open('bundestweets/data/translation_set.json', 'w+') as fp:
+        json.dump(translation_set, fp)
+    
+    # open database file and save preprocessed columns
     conn = sqlite3.connect(args.file)
     cur = conn.cursor()
 

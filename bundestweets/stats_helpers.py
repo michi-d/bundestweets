@@ -18,7 +18,6 @@ import bundestweets.helpers as helpers
 
 party_list = ['CDU/CSU', 'SPD', 'Bündnis 90/Die Grünen', 'FDP', 'Die Linke', 'AfD', 'fraktionslos'] 
 
-
 def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
     '''Get basic dataset of all members and together with their tweets
     
@@ -59,5 +58,7 @@ def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
 
     # rename username to screen_name
     df.rename(columns={"username": "screen_name"}, inplace=True)
+    
+    df.date = pd.to_datetime(df.date, format='%Y-%m-%d-%H-%M-%S')
     
     return df
