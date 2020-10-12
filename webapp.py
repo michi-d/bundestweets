@@ -19,21 +19,22 @@ from holoviews import render
 import bundestweets.helpers as helpers
 import bundestweets.vis_helpers as vis_helpers
 import bundestweets.stats_helpers as stats_helpers
+import bundestweets.row_operators as row_operators
 import pages.start
 import pages.dataset
 import pages.relations
 import pages.language
+import pages.topics
 
-#import pdb; pdb.set_trace()
 
 PAGES = {
     "Start": pages.start,
     "Dataset": pages.dataset,
     "Language": pages.language,
     "Relations": pages.relations,
+    "Topics": pages.topics,
 #    "About": src.pages.about,
 }
-
 
 def main():
     """Main function of the App"""
@@ -49,6 +50,10 @@ def main():
     # load NLP translation dictionary
     with open('bundestweets/data/translation_set.json', 'r') as fp:
         translation_set = json.load(fp)
+        
+    # transform tweet messages to sets of words (for topics page)
+    wordsets = vis_helpers.get_tweets_as_wordsets(content_tweets)
+    nmf_topics = vis_helpers.get_nmf_results()
 
     analysis = {
         "my_data": my_data,
@@ -56,15 +61,14 @@ def main():
         "monthly_stats": monthly_stats,
         "how_many": how_many,
         "member_stats": member_stats,
-        "translation_set": translation_set
+        "translation_set": translation_set,
+        "wordsets": wordsets,
+        "topics": nmf_topics
     }
     
-    # write Start screen
-    
+    # write navigation panel
     st.sidebar.title("Navigation")
-    
     selection = st.sidebar.radio("Go to", list(PAGES.keys()))
-
     page = PAGES[selection]
     
     with st.spinner(f"Loading {selection} ..."):

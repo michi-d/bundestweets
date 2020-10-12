@@ -52,3 +52,15 @@ def get_mentioned_parliament_members(row, parliament_account_names):
         return list(mentioned_members)
     else:
         return None
+    
+def get_tweet_as_word_set(row):
+    """Return tweet text as a set of words.
+    
+    Args:
+        row: Row of the base DataFrame
+        
+    Returns:
+        wordset: Tweet text as a set of words
+    """
+    wordset = set(row.text.lower().split())
+    return wordset

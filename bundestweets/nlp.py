@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.decomposition import NMF
 
 from collections import defaultdict
 import pandas as pd
@@ -270,3 +271,93 @@ def get_all_top_n_words(data, translation_set, n=40, verbose=0):
         party_word_importance[party] = word_importance
     
     return party_word_importance, train_acc, test_acc
+
+
+def get_NMF_topics(model, feature_names, n_top_words, verbose=0):
+    """Return the top words for each topic.
+    
+    Args:
+        model: Fitted NMF model
+        feature_names: Names for each feature column
+        n_top_words: Specifies how many words to return per topic
+        verbose: Print results or not
+        
+    Returns:
+        top_words: Dictionary with the top words for each topic
+    """
+    top_words = dict()
+    for topic_idx, topic in enumerate(model.components_):
+        words = [feature_names[i] for i in topic.argsort()[:-n_top_words - 1:-1]]
+        top_words[topic_idx] = words
+        
+        if verbose:
+            message = "Topic #%d: " % topic_idx
+            message += " ".join(words)
+            print(message)
+            
+    return top_words
+
+
+def nmf_tokenizer(s):
+    """Tokenize strings by splitting, but use only words longer than 2 characters"""
+    return [w for w in s.split() if len(w)>2]
+
+
+def perform_NMF_analysis(data, n_components=20, verbose=0):
+    """
+    Args:
+        data: Input dataset
+        n_components: Components parameter for NMF
+        verbose: Whether to print intermediate results or not
+        
+    Returns:
+        topics: Dictionary mapping topic ID to top 5 tokens
+        tweet_topics: Topic for each tweet
+    """
+
+    vectorizer = TfidfVectorizer(analyzer="word", max_df=0.90, min_df=50, norm="l2", tokenizer=nmf_tokenizer, lowercase=True, ngram_range=(1,1))
+    x_train = vectorizer.fit_transform(data['hashtags'])
+    if verbose:
+        print(f'Input matrix shape: {x_train.shape}')
+
+    # run NMF
+    clf = NMF(n_components=n_components, random_state=1, 
+              alpha=.1, l1_ratio=0.0, verbose=True, beta_loss="frobenius", solver="mu")
+    W1  = clf.fit_transform(x_train)
+    H1  = clf.components_
+
+    # get topics 
+    tf_feature_names = vectorizer.get_feature_names()
+    topics = get_NMF_topics(clf, tf_feature_names, n_top_words=5, verbose=verbose)
+    
+    # get topic for each tweet
+    tweet_topics = W1.argmax(1)
+    
+    return topics, tweet_topics
+
+
+def intersect_topics(topics, wordsets):
+    """Find intersections between topics and tweet messages.
+    Matches are counted by the number of words in both sets.
+    
+    Args:
+        topics: Dictionary mapping topic ID's to key words
+        wordsets: pandas.Series of tweet messages formatted as sets of words
+        
+    Returns:
+        intersections: numpy.array indicating number of word intersections 
+            for each tweet and topic
+    """
+    
+    intersections = np.zeros((len(wordsets), len(topics)))
+    for ind in range(len(topics)):
+        selector = set(topics[ind])
+        selector = {e.lower() for e in selector}
+
+        # get intersection between selector and each tweet
+        len_intersection = wordsets.apply(lambda row: len(row.intersection(selector)))
+
+        # save length of intersection with each topic
+        intersections[:, ind] = len_intersection
+
+    return intersections

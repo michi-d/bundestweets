@@ -10,12 +10,15 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import numpy as np
+import datetime as datetime
+import json
 
 import time
 import sqlite3
 import bundestweets.helpers as helpers
 import bundestweets.stats_helpers as stats_helpers
-from bundestweets.row_operators import * 
+import bundestweets.row_operators as row_operators
+from bundestweets.nlp import intersect_topics
 
 import holoviews as hv
 from holoviews import opts as hv_opts
@@ -67,7 +70,7 @@ def map_color(party):
     return party_cmap[party]
 
 
-@st.cache
+@st.cache(show_spinner=False)
 def get_monthly_stats(content_tweets):
     """Get monthly tweet count per party
     
@@ -87,7 +90,7 @@ def get_monthly_stats(content_tweets):
     return stats
 
 
-@st.cache
+@st.cache(show_spinner=False)
 def how_many_members(df):
     """Count representatives in Twitter or Parliament per Party
     
@@ -115,7 +118,7 @@ def how_many_members(df):
     
     return count
 
-@st.cache
+@st.cache(show_spinner=False)
 def get_member_stats(content_tweets):
     """Get some statistics on an individual level
     
@@ -137,7 +140,7 @@ def get_member_stats(content_tweets):
     return member_stats
 
 
-@st.cache
+@st.cache(show_spinner=False)
 def get_responses_count(data):
     """
     
@@ -179,7 +182,7 @@ def get_responses_count(data):
     return responses_count
 
 
-@st.cache
+@st.cache(show_spinner=False)
 def generate_chord_diagram(responses_count):
     
     # generate dataframes as required for the plotting function
@@ -210,7 +213,7 @@ def generate_chord_diagram(responses_count):
     
     return chord
 
-
+@st.cache(show_spinner=False)
 def create_word_cloud(party_word_importance, party):
     """Creates a word cloud image for one party
     
@@ -240,3 +243,80 @@ def create_word_cloud(party_word_importance, party):
     wordcloud = wordcloud.generate_from_frequencies(frequencies=word_freq)
     
     return wordcloud
+
+
+@st.cache(show_spinner=False)
+def get_tweets_as_wordsets(data):
+    """Transforms tweets messages to set of words (for topic page).
+    
+    Args:
+        data: Tweet database
+        
+    Returns:
+        wordsets: Tweets as sets of words
+    """
+    wordsets = data.apply(row_operators.get_tweet_as_word_set, axis=1)
+    return wordsets
+
+
+@st.cache(show_spinner=False)
+def get_topic_timeline_df(topics, wordsets, data):
+    """Prepares data for the timeline plot (Topics vs. time).
+    
+    Args:
+        topics: Dictionary mapping topic ID's to key words
+        wordsets: pandas.Series of tweet messages formatted as sets of words
+        data: Tweet Dataset
+        
+    Returns:
+        plot_df: Dataframe formatted for plotting
+    """
+    
+    # intersect topics with all twitter messages
+    intersections = intersect_topics(topics, wordsets)
+    my_topics = pd.DataFrame(intersections, index=data.date)
+
+    # get new time axis (monthly resolution)
+    start_datetime = datetime.datetime.strptime('2018/01/01', '%Y/%M/%d')
+    end_datetime = datetime.datetime.today()
+
+    start_datetime = datetime.datetime(
+        year=start_datetime.year, 
+        month=start_datetime.month,
+        day=start_datetime.day,
+    )
+    end_datetime = datetime.datetime(
+        year=end_datetime.year, 
+        month=end_datetime.month,
+        day=end_datetime.day,
+    )
+    new_index = pd.date_range(start_datetime, end_datetime, freq='M')
+    
+    # resample topic data with new time index and re-format to long format
+    plot_df = my_topics.resample('m').sum().reindex(new_index, fill_value=0).melt(value_vars=range(len(topics)), ignore_index=False)
+    plot_df = plot_df.reset_index()
+    plot_df.columns = ['Date', 'Keywords', 'Tweets']
+    plot_df['Keywords'] = plot_df['Keywords'].apply(lambda k: " ".join(topics[k]))
+    
+    return plot_df
+
+
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def get_nmf_results():
+    """Load NMF results from json file."""
+
+    with open('./bundestweets/data/nmf_topics.json', 'r') as fp:
+        nmf_topics = json.load(fp)
+        
+    nmf_topics = {int(k): v for (k,v) in nmf_topics.items()}
+    return nmf_topics
+
+
+def reload_nmf_results():
+    """Load NMF results from json file."""
+
+    with open('./bundestweets/data/nmf_topics.json', 'r') as fp:
+        nmf_topics = json.load(fp)
+        
+    nmf_topics = {int(k): v for (k,v) in nmf_topics.items()}
+    return nmf_topics

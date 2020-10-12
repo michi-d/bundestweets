@@ -56,7 +56,7 @@ def write(analysis):
     """)
 
     # set default start and end times
-    start_datetime = datetime.datetime.strptime('2018/01/01', '%Y/%M/%d')
+    start_datetime = datetime.datetime.strptime('2020/01/01', '%Y/%M/%d')
     end_datetime = datetime.datetime.today()
     
     # select date range widget
