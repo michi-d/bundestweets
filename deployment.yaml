@@ -15,22 +15,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bundestweets
+  name: myapp
   labels:
-    app: bundestweets
+    app: myapp
 spec:
   selector:
     matchLabels:
-      app: bundestweets
+      app: myapp
   template:
     metadata:
       labels:
-        app: bundestweets
+        app: myapp
     spec:
       # Main container
       containers:
-        - name: bundestweets
-          image: gcr.io/bundestweets/bundestweets:v3
+        - name: myapp
+          image: gcr.io/bundestweets/myapp:v3
           ports:
             - containerPort: 8080
           # Set env variables used for Postgres Connection
