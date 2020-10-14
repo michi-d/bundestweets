@@ -18,7 +18,7 @@ import bundestweets.helpers as helpers
 
 party_list = ['CDU/CSU', 'SPD', 'Bündnis 90/Die Grünen', 'FDP', 'Die Linke', 'AfD', 'fraktionslos'] 
 
-def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
+def get_raw_data(local=False, do_fresh_download=False, db_file='tweets_data.db'):
     '''Get basic dataset of all members and together with their tweets
     
     Args:
@@ -36,9 +36,14 @@ def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
     #dir_path = os.path.dirname(os.path.realpath(__file__))
     #file_path = os.path.join(dir_path, 'data', db_file)
         
-    conn = sqlite3.connect(db_file)
-    df = pd.read_sql("SELECT * FROM tweets", conn)
-    conn.close()
+    if local:
+        # local database file
+        conn = sqlite3.connect(db_file)
+        df = pd.read_sql("SELECT * FROM tweets", conn)
+        conn.close()
+    else:
+        # Cloud SQL
+        df = helpers.cloud_get_dataset()
     
     # merge members with corresponding tweets
     person = members_bundestag.loc[:, ['real_name', 'party', 'screen_name']]
@@ -56,9 +61,10 @@ def get_raw_data(do_fresh_download=False, db_file='tweets_data.db'):
     mask = df.party.apply(lambda row: '*' not in row)
     df = df.loc[mask, :]
 
+    # convert date to datetime
+    df.date = pd.to_datetime(df.date, format='%Y-%m-%d-%H-%M-%S')
+    
     # rename username to screen_name
     df.rename(columns={"username": "screen_name"}, inplace=True)
-    
-    df.date = pd.to_datetime(df.date, format='%Y-%m-%d-%H-%M-%S')
     
     return df

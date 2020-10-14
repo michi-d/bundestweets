@@ -15,6 +15,7 @@ import time
 import sqlite3 
 import json
 from holoviews import render
+import argparse
 
 import bundestweets.helpers as helpers
 import bundestweets.vis_helpers as vis_helpers
@@ -27,6 +28,10 @@ import pages.language
 import pages.topics
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-l', '--local', default=False, action='store_true')
+args = parser.parse_args()
+
 PAGES = {
     "Start": pages.start,
     "Dataset": pages.dataset,
@@ -38,9 +43,9 @@ PAGES = {
 
 def main():
     """Main function of the App"""
-    
+        
     # get basic data
-    my_data, content_tweets = vis_helpers.get_data('bundestweets/data/tmp_data.db')
+    my_data, content_tweets = vis_helpers.get_data(args.local, db_file='bundestweets/data/tmp_data.db')
 
     # get some basic statistics
     monthly_stats = vis_helpers.get_monthly_stats(content_tweets)

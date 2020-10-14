@@ -240,7 +240,11 @@ def get_top_n_words_from_model(model, vectorizer, category, n, translation_set, 
         # if words are stemmed take the most frequent original word
         words_ = []
         for w in words:
-            chosen_word = pd.Series(translation_set[w]).idxmax()
+            try:
+                chosen_word = pd.Series(translation_set[w]).idxmax()
+            except KeyError:
+                # if word is not in translation set, take the stem instead (could happen for new words)
+                chosen_word = w
             words_.append(chosen_word)
         words = words_
     

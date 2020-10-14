@@ -16,6 +16,8 @@ import unidecode
 import json
 import pandas as pd
 import sqlite3
+import tqdm
+import pymysql
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -422,3 +424,118 @@ def extend_tweet_database(data, filename="tweets_data.db"):
     conn.close()
 
 
+def cloud_create_tweet_database():
+    """Creates tweet database on Google Cloud.
+    Proxy must be running in the background.
+    """
+    connection = pymysql.connect(host='127.0.0.1',
+                                 user='root',
+                                 password=input("Enter password:"),
+                                 db='tweets')
+    cursor = connection.cursor()
+    
+    # create table
+    cursor.execute('CREATE TABLE IF NOT EXISTS tweets ('
+                   'id BIGINT PRIMARY KEY,'
+                   'permalink TEXT,'
+                   'username TEXT,'
+                   'resp_to TEXT,'
+                   'text TEXT,'
+                   'text_stemmed TEXT,'
+                   'text_cleaned TEXT,'
+                   'date TEXT,'
+                   'retweets INT,'
+                   'favorites INT,'
+                   'mentions TEXT,'
+                   'hashtags TEXT)')
+    
+    # describe
+    cursor.execute('DESCRIBE tweets;')
+    print('Output of: "DESCRIBE tweets;""')
+    print(cursor.fetchall())
+    
+    # close connection
+    cursor.close()
+    connection.close()
+    
+    
+def cloud_upload_local_to_tweet_database(data):
+    """Uploads a local PREPROCESSED dataset to the cloud.
+    
+    Args:
+        data: Dataframe with preprocessed tweet dataset
+    """
+    connection = pymysql.connect(host='127.0.0.1',
+                                 user='root',
+                                 password=input("Enter password:"),
+                                 db='tweets')
+    cursor = connection.cursor()
+    
+    # upload each row of the dataset
+    for i, tweet in tqdm.tqdm(data.iterrows()):
+        cursor.execute("""INSERT IGNORE INTO tweets(
+                        id, 
+                        permalink, 
+                        username, 
+                        resp_to, 
+                        text, 
+                        text_stemmed, 
+                        text_cleaned, 
+                        date, 
+                        retweets, 
+                        favorites, 
+                        mentions, 
+                        hashtags) 
+
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);""", (
+
+            str(tweet['id']),
+            str(tweet['permalink']),
+            str(tweet['screen_name']),
+            str(tweet['resp_to']),
+            str(tweet['text']),
+            str(tweet['text_stemmed']),
+            str(tweet['text_cleaned']),
+            str(datetime.datetime.strftime(tweet.date, '%Y-%m-%d-%H-%M-%S')),
+            tweet['retweets'],
+            tweet['favorites'],
+            str(tweet['mentions']),
+            str(tweet['hashtags'])))
+
+        
+    # commit changes
+    connection.commit()
+    
+    # close connection
+    cursor.close()
+    connection.close()
+    
+    
+def cloud_get_dataset():
+    """Gets the dataset from Google MySQL
+    
+    Returns:
+        data: DataFrame with tweet dataset
+    """
+    
+    DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+    DB_NAME = os.environ.get('DB_NAME', '')
+    DB_USER = os.environ.get('DB_USER', '')
+    DB_PASS = os.environ.get('DB_PASS', '')
+        
+    conn = pymysql.connect(host=DB_HOST,
+                           user=DB_USER,
+                           password=DB_PASS,
+                           db=DB_NAME)
+    
+    with conn.cursor() as cursor:
+        result = cursor.execute('SELECT * FROM tweets;')
+        data = cursor.fetchall()
+        data = pd.DataFrame(data)
+            
+    conn.close()
+    
+    data.columns = ['id', 'permalink', 'username', 'resp_to', 'text', 'text_stemmed', 
+                    'text_cleaned', 'date', 'retweets', 'favorites', 'mentions', 'hashtags']
+    
+    return data
