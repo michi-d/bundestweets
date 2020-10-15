@@ -522,6 +522,8 @@ def cloud_get_dataset():
     DB_NAME = os.environ.get('DB_NAME', '')
     DB_USER = os.environ.get('DB_USER', '')
     DB_PASS = os.environ.get('DB_PASS', '')
+    
+    print([DB_HOST, DB_NAME, DB_USER, DB_PASS])
         
     conn = pymysql.connect(host=DB_HOST,
                            user=DB_USER,
