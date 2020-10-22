@@ -124,7 +124,7 @@ def preprocess_for_nlp(data):
         translation_set: Dictionary mapping from word stems to originals
     """
     
-    data.date = pd.to_datetime(data.date, format='%Y-%m-%d-%H-%M-%S')
+    #data.date = pd.to_datetime(data.date, format='%Y-%m-%d-%H-%M-%S')
 
     # delete NaN entries (only a few)
     mask_na = data.id.isna()
