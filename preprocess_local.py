@@ -10,6 +10,7 @@ import bundestweets.stats_helpers as stats_helpers
 import bundestweets.nlp as my_nlp
 import sqlite3
 import json
+import bundestweets.bert as bert
 
 
 parser = argparse.ArgumentParser()
@@ -20,7 +21,7 @@ args = parser.parse_args()
 def main():
     
     # load data
-    data = stats_helpers.get_raw_data(db_file=args.file)
+    data = stats_helpers.get_raw_data(local=True, db_file=args.file)
     
     # preprocess
     data, translation_set = my_nlp.preprocess_for_nlp(data)
@@ -28,6 +29,10 @@ def main():
     # save translation set
     with open('bundestweets/data/translation_set.json', 'w+') as fp:
         json.dump(translation_set, fp)
+        
+    # run bert model for offensive language identification
+    bert_proba = bert.run_bert(data)
+    data['offensive_proba'] = bert_proba[:, 1]
     
     # open database file and save preprocessed columns
     conn = sqlite3.connect(args.file)
@@ -52,6 +57,18 @@ def main():
     # update columns "text_cleaned"
     recordList = list(zip(data.text_cleaned, data.id.astype('int')))
     sqlite_update_query = """UPDATE tweets set text_cleaned = ? where id = ?"""
+    cur.executemany(sqlite_update_query, recordList)
+    conn.commit()
+    
+    # generate column "offensive_proba"
+    try:
+        cur.execute('ALTER TABLE tweets ADD offensive_proba FLOAT CONSTRAINT d_offensive_zero DEFAULT 0;')
+    except sqlite3.OperationalError:
+        print('Column "offensive_proba" exists already.')
+        
+    # update columns "offensive_proba"
+    recordList = list(zip(data.offensive_proba, data.id.astype('int')))
+    sqlite_update_query = """UPDATE tweets set offensive_proba = ? where id = ?"""
     cur.executemany(sqlite_update_query, recordList)
     conn.commit()
 

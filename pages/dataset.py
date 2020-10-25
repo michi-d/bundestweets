@@ -38,7 +38,7 @@ def write(analysis):
     st.write("""
     ## Dataset
     
-    Our data set contains around ~450.000 tweets, posted by all members of the Bundestag which have a Twitter account
+    Our data set contains around ~500.000 tweets, posted by all members of the Bundestag which have a Twitter account
     since the year 2018.
     
     Have a look at some general statistics from our Bundestweet dataset!

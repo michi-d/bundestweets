@@ -30,13 +30,13 @@ from matplotlib.colors import to_rgba
 from matplotlib.colors import LinearSegmentedColormap
 
 party_cmap = {
-    'SPD': 'red',
     'CDU/CSU': 'black', 
+    'SPD': 'red',
+    'FDP': 'gold',
     'Die Linke': 'orchid',
     'Bündnis 90/Die Grünen': 'limegreen', 
     'AfD': 'steelblue',
     'fraktionslos': 'gray',
-    'FDP': 'gold'
 }
 
 
@@ -185,7 +185,7 @@ def get_responses_count(data):
 
 
 @st.cache(show_spinner=False)
-def generate_chord_diagram(responses_count):
+def generate_chord_diagram(responses_count, thr_count=5):
     
     # generate dataframes as required for the plotting function
     plot_data = responses_count.loc[responses_count['count']>0, ['index', 'target', 'count']]
@@ -200,8 +200,8 @@ def generate_chord_diagram(responses_count):
     # generate colormap for single accounts according to party affiliations
     person_party_cmap = dict(zip(responses_count['index'], responses_count['party'].apply(lambda row: party_cmap[row])))
     
-    # generae plot
-    chord = hv.Chord((plot_data, nodes)).select(value=(10, None))
+    # generate plot
+    chord = hv.Chord((plot_data, nodes)).select(value=(thr_count, None))
     chord.opts(
         hv_opts.Chord(cmap=party_cmap, 
                    edge_cmap=person_party_cmap, 
@@ -214,6 +214,7 @@ def generate_chord_diagram(responses_count):
                    width=700))
     
     return chord
+
 
 @st.cache(show_spinner=False)
 def create_word_cloud(party_word_importance, party):
@@ -240,7 +241,7 @@ def create_word_cloud(party_word_importance, party):
 
 
     wordcloud = WordCloud(background_color="white", random_state=0,
-                          width=800, height=400, max_words=40, max_font_size=60, relative_scaling=0.5,
+                          width=800, height=400, max_words=35, max_font_size=60, relative_scaling=0.5,
                           prefer_horizontal=1.0, colormap=newcmp)
     wordcloud = wordcloud.generate_from_frequencies(frequencies=word_freq)
     
@@ -322,3 +323,31 @@ def reload_nmf_results():
         
     nmf_topics = {int(k): v for (k,v) in nmf_topics.items()}
     return nmf_topics
+
+
+def generate_barplot_responding_to(responses_count, party='CDU/CSU'):
+    """
+    Given the grouped the responses count DataFrame between single members,
+    group by parties and generate party-wise statistics.
+    
+    Args:
+        responses_count: output of get_responses_count
+    
+    Returns:
+        chart: Bar chart summarizing party-wise response statistics
+    """
+    
+    party_responses_to = responses_count[['party', 'target_party', 'count']].groupby(['party', 'target_party']).sum()
+    plot_data = party_responses_to.loc[party].reset_index()
+
+    chart = alt.Chart(plot_data).mark_bar().encode(
+        y=alt.Y('count:Q', axis=alt.Axis(title='Tweets')),
+        x=alt.X('target_party:N', axis=alt.Axis(title='Responding to')),
+        color=alt.Color("target_party:N", scale=alt.Scale(domain=stats_helpers.party_list,
+                                                   range=list(map(map_color, stats_helpers.party_list))
+                                                  ))
+    ).properties(width=400, height=400)
+    
+    return chart
+
+

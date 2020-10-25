@@ -25,6 +25,7 @@ import pages.start
 import pages.dataset
 import pages.relations
 import pages.language
+import pages.content
 import pages.topics
 
 
@@ -35,9 +36,10 @@ args = parser.parse_args()
 PAGES = {
     "Start": pages.start,
     "Dataset": pages.dataset,
-    "Language": pages.language,
+    "Content analysis": pages.content,
+    "Offensive language": pages.language,
     "Relations": pages.relations,
-    "Topics": pages.topics,
+    "Topics timeline": pages.topics,
 #    "About": src.pages.about,
 }
 

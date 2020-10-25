@@ -357,13 +357,13 @@ def create_tweet_database(filename="tweets_data.db"):
     '''Creates a SQL database for tweets
 
     Args:
-        filename: Filename for the database
+        filename: Path to file for the database
     '''
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'data', filename)
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    #file_path = os.path.join(dir_path, 'data', filename)
 
-    conn = sqlite3.connect(file_path)
+    conn = sqlite3.connect(filename)
 
     cur = conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS tweets ('
@@ -386,13 +386,13 @@ def extend_tweet_database(data, filename="tweets_data.db"):
 
     Args:
         data (list): List of new tweets to add
-        filename: Filename of the database file
+        filename: Path to file of the database file
     '''
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'data', filename)
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    #file_path = os.path.join(dir_path, 'data', filename)
 
-    conn = sqlite3.connect(file_path)
+    conn = sqlite3.connect(filename)
     cur = conn.cursor()
 
     for tweet in data:
