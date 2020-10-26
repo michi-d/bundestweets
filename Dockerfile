@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.8-slim
 
 RUN pip install virtualenv
 ENV VIRTUAL_ENV=/venv
@@ -18,7 +18,7 @@ COPY . /app
 ENV PORT 8501
 
 # cmd to launch app when container is run
-CMD streamlit run webapp.py
+CMD streamlit run app.py
 
 # streamlit-specific commands for config
 ENV LC_ALL=C.UTF-8
