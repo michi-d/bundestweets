@@ -12,7 +12,7 @@ Usage:
 
 Options:
     --start_index INT    Index to start from when program was interrupted previously (total 734 members as of 2020)
-    --since_date STR     Scrape all tweets from this day until now.  
+    --since_date STR     Scrape all tweets from this day until now (e.g., '2018-01-01').
     --file STR           Filename of the SQL database
     --do_fresh_download  Boolean, 1 or 0, indicating whether it is necessary to download list of members or not.
 """
@@ -70,13 +70,19 @@ def main():
             
             if not pd.isna(user_name):
                 try:
-                    user_tweets = helpers.get_tweets(user_name, since_date=since_date)
-                    user_tweets = [helpers.tweet_to_dict(t) for t in user_tweets]
+                    # OLD code using GetOldTweets3 (not working since Sept 2020)
+                    #user_tweets = helpers.get_tweets(user_name, since_date=since_date)
+                    #user_tweets = [helpers.tweet_to_dict(t) for t in user_tweets]
+                    
+                    # NEW code using snscrape and tweepy (necessary since Sept 2020)
+                    user_tweets = helpers.get_tweets_snscrape(user_name, since_date=since_date)
+                    user_tweets = helpers.complete_tweets_snscrape(user_tweets, wait_time=300.0)
 
                     helpers.extend_tweet_database(user_tweets, filename=filename)
 
                     # avoid twitter API rate limit
-                    time.sleep(len(user_tweets)*0.25)
+                    #time.sleep(len(user_tweets)*0.25)
+                    #time.sleep(len(user_tweets)*4.0)
 
                 except:
                     e = sys.exc_info()[0]

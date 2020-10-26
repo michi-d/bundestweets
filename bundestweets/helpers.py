@@ -25,6 +25,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
+import snscrape.modules.twitter as sntwitter
+
 
 def get_tweets(username, since_date='2018-01-01', until_date='now'):
     '''Get all tweets from a user in a given time interval.
@@ -96,6 +98,82 @@ def get_API():
     api = tweepy.API(auth, wait_on_rate_limit_notify=True)
 
     return api
+
+
+def get_tweets_snscrape(username, since_date='2018-01-01', until_date='now'):
+    '''Get all tweets from a user in a given time interval.
+    (Using snscrape module necessary since Sept 2020)
+    
+    Args:
+        username (str): Username
+        since_date (str): The start date of the interval
+        until_date (str): The end date
+    
+    Returns:
+        tweets: List of GetOldTweets3.models.Tweet.Tweet objects
+    '''
+    
+    if until_date == 'now':
+        until_date = datetime.datetime.now().strftime('%Y-%m-%d')
+        
+    tweet_list = []
+    query = sntwitter.TwitterSearchScraper(f'from:{username} since:{since_date} until:{until_date}')
+    for i, tweet in enumerate(query.get_items()):
+        tweet_list.append(tweet)
+        
+    return tweet_list
+
+
+def complete_tweets_snscrape(tweet_list, wait_time=10.0):
+    """Get missing data via Tweepy API and formats tweets in the old output format.
+    (Using snscrape module necessary since Sept 2020)
+    
+    Args:
+        tweet_list: List of tweets from snscrape
+        wait_time: How long to wait if rate limit is reached.
+        
+    Returns:
+        dict_list: List tweets in dictionary format
+    """
+    
+    # get tweepy API
+    api = get_API()
+    
+    dict_list = []
+    #for tweet in tweet_list:
+    i = 0
+    while i < len(tweet_list):
+        try:
+            tweet = tweet_list[i]
+            id_ = tweet.id
+            tweetFetched = api.get_status(id_)
+
+            mentions = " ".join(re.findall(r'@\w+', tweet.content))
+            hashtags = " ".join(re.findall(r'#\w+', tweet.content))
+
+            tweet_dict = {
+                'id': id_,
+                'permalink': tweet.url,
+                'username': tweet.username,
+                'to': tweetFetched.in_reply_to_screen_name,
+                'text': tweet.content,
+                'date': tweet.date.strftime('%Y-%m-%d-%H-%M-%S'),
+                'retweets': tweetFetched.retweet_count,
+                'favorites': tweetFetched.favorite_count,
+                'mentions': mentions,
+                'hashtags': hashtags,
+                'geo': tweetFetched.geo
+            }
+            
+            dict_list.append(tweet_dict)
+            i += 1
+            
+        except tweepy.error.RateLimitError:
+            print(f'Twitter API Rate Limit reached. Waiting for {wait_time} seconds ...')
+            time.sleep(wait_time)
+            pass
+        
+    return dict_list
 
 
 def retrieve_accounts_bundestag(api):

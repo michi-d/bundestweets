@@ -40,7 +40,7 @@ party_cmap = {
 }
 
 
-@st.cache
+@st.cache(show_spinner=False)
 def get_data(local=False, db_file='bundestweets/data/tweets_data.db'):
     """Get all data from SQL file and filter for relevent tweets
     
@@ -351,3 +351,68 @@ def generate_barplot_responding_to(responses_count, party='CDU/CSU'):
     return chart
 
 
+@st.cache(show_spinner=False)
+def get_offensive_tweets(data, thr=0.9):
+    """
+    Filters for offensive tweets in the dataset.
+    
+    Args:
+        data: Tweet dataset
+        
+    Returns 
+        offensive_tweets: Offensive tweets dataset
+    """
+    
+    offensive_mask = (data.offensive_proba > 0.9)
+    offensive_tweets = data.loc[offensive_mask]
+    return offensive_tweets
+
+
+@st.cache(show_spinner=False)
+def get_plot_data_offensive_per_party(offensive_tweets, data):
+    """
+    Generates bar chart for offensive tweets per party.
+    
+    Args:
+        offensive_tweets: Offensive tweets dataset
+        data: Tweet dataset
+        
+    Returns 
+        plot_data_abso: Absolute numbers offensive tweets per party
+        plot_data_perc: Relative numbers offensive tweets per party
+    """
+    
+    plot_data_abso = offensive_tweets['party'].value_counts()
+    plot_data_perc = offensive_tweets['party'].value_counts()/data['party'].value_counts()
+    plot_data_abso = plot_data_abso.reset_index()
+    plot_data_perc = plot_data_perc.reset_index()
+    plot_data_abso.columns = ['party', 'count']
+    plot_data_perc.columns = ['party', 'count']
+    
+    return plot_data_abso, plot_data_perc
+
+
+@st.cache(show_spinner=False)
+def get_plot_data_offensive_responding(offensive_tweets):
+    """
+    Get plot data for counting offensive tweets as responses to other delegates
+    
+    Args:
+        offensive_tweets: Offensive tweet dataset
+        
+    Returns:
+        plot_data: Plot data for chart
+    """
+    df_name_party = offensive_tweets[['screen_name', 'real_name', 'party']].drop_duplicates().sort_values(by='party')
+    set_of_names = set(df_name_party['screen_name'])
+
+    N_argument = offensive_tweets.loc[:, 'resp_to'].apply(lambda row: str(row) in set_of_names).sum()
+    N_total = len(offensive_tweets)
+
+    plot_data = {'Responding to other delegates': N_argument, 
+                 'Other': N_total}
+    plot_data = pd.Series(plot_data)
+    plot_data = (plot_data/plot_data.sum()).reset_index()
+    plot_data.columns = ['label', 'count']
+    
+    return plot_data

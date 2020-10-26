@@ -45,9 +45,11 @@ PAGES = {
 
 def main():
     """Main function of the App"""
+    
+    st.sidebar.title("Bundestweets")
         
     # get basic data
-    my_data, content_tweets = vis_helpers.get_data(args.local, db_file='bundestweets/data/tmp_data.db')
+    my_data, content_tweets = vis_helpers.get_data(args.local, db_file='bundestweets/data/tweets_data.db')
 
     # get some basic statistics
     monthly_stats = vis_helpers.get_monthly_stats(content_tweets)
@@ -82,6 +84,19 @@ def main():
         page.write(analysis)
         
 
-
+    st.sidebar.title("About")
+    st.sidebar.info(
+        "This an open source project. Source code for app and algorithms are " 
+        "publicly available on "
+        "[GitHub](https://github.com/michi-d/bundestweets). "
+    )
+    st.sidebar.info(
+    """
+    This app is maintained by Michael Drews. 
+    For questions, suggestions, ideas or critics please
+    contact me at [michaelsdrews@gmail.com](mailto:michaelsdrews@gmail.com).
+    """
+    )
+    
 if __name__ == "__main__":
     main()

@@ -46,50 +46,67 @@ def write(analysis):
 
     """)
     
-    # set default start and end times
-    start_datetime = datetime.datetime.strptime('2018/05/01', '%Y/%M/%d')
-    end_datetime = datetime.datetime.today()
+    # Bar chart offensive tweets per party
+    st.write('''
+    ### How many offensive tweets were detected in the dataset for each party?
+    ''')
     
-    # select date range widget
-    st.write("""
-    ### Choose time frame:
-    """)
-    start_date = st.date_input('Start date', start_datetime)
-    end_date = st.date_input('End date', end_datetime)
+    offensive_tweets = vis_helpers.get_offensive_tweets(my_data)
+    plot_data_abso, plot_data_perc = vis_helpers.get_plot_data_offensive_per_party(offensive_tweets, my_data)
     
-    # convert back to datetime
-    start_datetime = datetime.datetime(year=start_date.year, month=start_date.month, day=start_date.day)
-    end_datetime = datetime.datetime(year=end_date.year, month=end_date.month, day=end_date.day)
+    plot_option_monthly = st.selectbox(
+        'Select mode:',
+         ['Absolute tweet count', 'Percentage of total tweets'])
+    
+    if plot_option_monthly == 'Absolute tweet count':
+        plot_data = plot_data_abso
+        format_ = 's'
+        y_title = 'Number of offensive tweets'
+    elif plot_option_monthly == 'Percentage of total tweets':
+        plot_data = plot_data_perc
+        format_ = '%'
+        y_title = 'Proportion of offensive tweets (%)'
+    
+    chart = alt.Chart(plot_data).mark_bar().encode(
+        y=alt.Y('count:Q', axis=alt.Axis(title=y_title, format=format_)),
+        x=alt.X('party:N', axis=alt.Axis(title='Party')),
+        color=alt.Color("party:N", scale=alt.Scale(domain=stats_helpers.party_list,
+                                                   range=list(map(vis_helpers.map_color, stats_helpers.party_list))
+                                                  ))
+    ).properties(width=600, height=400)
+    
+    st.write(chart)
 
-    # subset on selected time span
-    mask = ((my_data.date >= start_datetime) & (my_data.date <= end_datetime))
-    data_subset = my_data.loc[mask, :]
+    # Responses to other delegates
+    st.write('''
+    ### How many offensive tweets are the result of an argument between delegates?
+    ''')
     
-    # Drop down menu for threhold value
-    thr_count = st.selectbox('Display only connections with more replies than ...', 
-                          (3, 5, 10, 15), index=1)
-
-    ## Get response tweets
-    responses_count = vis_helpers.get_responses_count(data_subset)
+    plot_data = vis_helpers.get_plot_data_offensive_responding(offensive_tweets)
+    chart = alt.Chart(plot_data).mark_bar(size=20).encode(
+            x=alt.X('count:Q', stack='zero', axis=alt.Axis(title='Fraction of offensive tweets', format='%'), 
+                    scale=alt.Scale(domain=(0, 1))),
+            color=alt.Color("label:N")
+        ).properties(width=600, height=100)
+    st.write(chart)
     
-    # show number of tweets selected
-    if start_date < end_date:
-        st.success(f'{len(responses_count)} tweets selected.')
+    # Show offensive tweets
+    st.write('''
+    ### List of offensive tweets:
+    ###
+    ''')
+    plot_option_monthly = st.selectbox(
+        'Show last ...',
+         [10, 20, 50, 100, 'all'], index=0)
+    if plot_option_monthly == 'all':
+        limit = 1e9
     else:
-        st.error('Error: End date must fall after start date.')
+        limit = int(plot_option_monthly)
         
-    ## Chord diagram
-    chord_diagram = vis_helpers.generate_chord_diagram(responses_count, thr_count=int(thr_count))
-
-    st.write(render(chord_diagram, backend='bokeh'))
-
-    st.write("""
-    ### How does this look like if we group by party and count the responses?
-    """)
-    ## Party-wise statistics
-    for party in vis_helpers.party_cmap.keys():
-        st.write(f"""### {party}""")
-        chart = vis_helpers.generate_barplot_responding_to(responses_count, party=party)
-        st.write(chart)
-
-
+    for i, (id_, row) in enumerate(offensive_tweets.sort_values(by='date', ascending=False).iterrows()):
+        st.write(f"""**{row.real_name}**, {row.party}, {row.date}:""")
+        st.write(f"""{row.text}""")
+        st.write(f"""{row.permalink}""")
+        st.markdown("<hr>", unsafe_allow_html=True)
+        if i == limit:
+            break

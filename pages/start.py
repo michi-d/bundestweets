@@ -22,7 +22,7 @@ def write(analysis):
     of all members of the German Bundestag. It is based on a dataset comprising all tweets posted by the
     current delegates since the beginning of 2018. The dataset contains so far about ~500.000 tweets and 
     is being continuosly updated. So far, we analyzed content, language and the Twitter relationships 
-    of the delegates among each other. New suggestions, ideas, critics and questions are always a welcome, 
+    of the delegates among each other. New suggestions, ideas, critics and questions are always welcome, 
     so please feel free to contact:
     
     [michaelsdrews@gmail.com](mailto:michaelsdrews@gmail.com)
