@@ -25,7 +25,7 @@ def write(analysis):
     my_data = analysis['my_data']
     
     st.write("""
-    ## Offensive language
+    # Offensive language
     
     Offensive and polarizing language is becoming increasingly a problem in online political communication. 
     How do our elected representatives do with respect to this issue?
@@ -95,13 +95,13 @@ def write(analysis):
     ### List of offensive tweets:
     ###
     ''')
-    plot_option_monthly = st.selectbox(
+    choose_limit = st.selectbox(
         'Show last ...',
          [10, 20, 50, 100, 'all'], index=0)
-    if plot_option_monthly == 'all':
+    if choose_limit == 'all':
         limit = 1e9
     else:
-        limit = int(plot_option_monthly)
+        limit = int(choose_limit)
         
     for i, (id_, row) in enumerate(offensive_tweets.sort_values(by='date', ascending=False).iterrows()):
         st.write(f"""**{row.real_name}**, {row.party}, {row.date}:""")

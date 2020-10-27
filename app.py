@@ -23,6 +23,7 @@ import bundestweets.stats_helpers as stats_helpers
 import bundestweets.row_operators as row_operators
 import pages.start
 import pages.dataset
+import pages.compare
 import pages.relations
 import pages.language
 import pages.content
@@ -36,6 +37,7 @@ args = parser.parse_args()
 PAGES = {
     "Start": pages.start,
     "Dataset": pages.dataset,
+    "Compare members": pages.compare,
     "Content analysis": pages.content,
     "Offensive language": pages.language,
     "Relations": pages.relations,

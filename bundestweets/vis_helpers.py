@@ -416,3 +416,47 @@ def get_plot_data_offensive_responding(offensive_tweets):
     plot_data.columns = ['label', 'count']
     
     return plot_data
+
+
+@st.cache(show_spinner=False)
+def get_member_tweets_per_month(member_tweets):
+    """Aggregate member tweets per month for timeline plot
+    
+    Args:
+        member_tweets: DataFrame with all tweets of a given member
+        
+    Returns:
+        plot_df: Member stats aggregated by month
+    """
+    
+    # get new time axis (monthly resolution)
+    start_datetime = datetime.datetime.strptime('2018/01/01', '%Y/%M/%d')
+    end_datetime = datetime.datetime.today()
+
+    start_datetime = datetime.datetime(
+        year=start_datetime.year, 
+        month=start_datetime.month,
+        day=start_datetime.day,
+    )
+    end_datetime = datetime.datetime(
+        year=end_datetime.year, 
+        month=end_datetime.month,
+        day=end_datetime.day,
+    )
+    new_index = pd.date_range(start_datetime, end_datetime, freq='M')
+    
+    # aggregate per month
+    plot_df = member_tweets.set_index(['date']).groupby(
+        [pd.Grouper(freq='m', level=0), 
+         pd.Grouper(key='real_name')])\
+        .aggregate({'id': 'count',
+                    'favorites': 'sum',
+                    'retweets': 'sum'})\
+        .reindex(new_index, fill_value=0, level=0)\
+        .reset_index()
+        
+                           #.melt(value_vars=['real_name'], ignore_index=False)
+    #plot_df = plot_df.reset_index()
+    plot_df.columns = ['date', 'real_name', 'count', 'favorites', 'retweets']
+    
+    return plot_df

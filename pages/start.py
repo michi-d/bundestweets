@@ -8,7 +8,7 @@ def write(analysis):
     """Writes the start Page"""
     
     st.write("""
-    ## **Bundestweets**
+    # **Bundestweets**
     *An interactive social media explorer for tweets from the German Bundestag*
     """)
     st.image('./pages/bundestweets.png', width=600)

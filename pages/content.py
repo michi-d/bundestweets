@@ -21,7 +21,7 @@ def write(analysis):
     translation_set = analysis['translation_set']
     
     st.write("""
-    ## Content analysis
+    # Content analysis
     *Predicting party affiliation from tweets*
     
     If you read 500.000 

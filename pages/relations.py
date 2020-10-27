@@ -25,7 +25,7 @@ def write(analysis):
     my_data = analysis['my_data']
     
     st.write("""
-    ## Relations
+    # Relations
     
     How often do the delegates interact and respond to each other on Twitter?
     Select a time frame and generate a visualization showing the connections

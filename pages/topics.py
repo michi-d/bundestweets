@@ -21,7 +21,7 @@ def write(analysis):
     wordsets = analysis['wordsets']
     
     st.write("""
-    ## Topic identification
+    # Topic identification
     
     What do the delegates of the Bundestag tweet about? What topics are most intensively discussed via Twitter? And how does this develop over time?
     
