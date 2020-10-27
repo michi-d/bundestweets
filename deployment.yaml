@@ -30,7 +30,7 @@ spec:
       # Main container
       containers:
         - name: btapp
-          image: gcr.io/bundestweets/btapp:v3
+          image: gcr.io/bundestweets/btapp:v4
           ports:
             - containerPort: 8080
           # Set env variables used for Postgres Connection
