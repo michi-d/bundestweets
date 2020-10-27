@@ -616,6 +616,7 @@ def cloud_get_dataset():
     conn.close()
     
     data.columns = ['id', 'permalink', 'username', 'resp_to', 'text', 'text_stemmed', 
-                    'text_cleaned', 'date', 'retweets', 'favorites', 'mentions', 'hashtags']
+                    'text_cleaned', 'date', 'retweets', 'favorites', 'mentions', 
+                    'hashtags', 'offensive_proba']
     
     return data
