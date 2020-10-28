@@ -502,13 +502,20 @@ def extend_tweet_database(data, filename="tweets_data.db"):
     conn.close()
 
 
-def cloud_create_tweet_database():
+def cloud_create_tweet_database(pw=None):
     """Creates tweet database on Google Cloud.
     Proxy must be running in the background.
     """
+    # get password
+    if not pw:
+        password = input("Enter password:")
+    else:
+        password = pw
+        
+    # connect to MySQL server
     connection = pymysql.connect(host='127.0.0.1',
                                  user='root',
-                                 password=input("Enter password:"),
+                                 password=password,
                                  db='tweets')
     cursor = connection.cursor()
     
@@ -525,7 +532,8 @@ def cloud_create_tweet_database():
                    'retweets INT,'
                    'favorites INT,'
                    'mentions TEXT,'
-                   'hashtags TEXT)')
+                   'hashtags TEXT,'
+                   'offensive_proba FLOAT)')
     
     # describe
     cursor.execute('DESCRIBE tweets;')
@@ -537,15 +545,22 @@ def cloud_create_tweet_database():
     connection.close()
     
     
-def cloud_upload_local_to_tweet_database(data):
+def cloud_upload_local_to_tweet_database(data, pw=None):
     """Uploads a local PREPROCESSED dataset to the cloud.
     
     Args:
         data: Dataframe with preprocessed tweet dataset
     """
+    # get password
+    if not pw:
+        password = input("Enter password:")
+    else:
+        password = pw
+        
+    # connect to MySQL server
     connection = pymysql.connect(host='127.0.0.1',
                                  user='root',
-                                 password=input("Enter password:"),
+                                 password=password,
                                  db='tweets')
     cursor = connection.cursor()
     
@@ -563,9 +578,10 @@ def cloud_upload_local_to_tweet_database(data):
                         retweets, 
                         favorites, 
                         mentions, 
-                        hashtags) 
+                        hashtags,
+                        offensive_proba) 
 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);""", (
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);""", (
 
             str(tweet['id']),
             str(tweet['permalink']),
@@ -578,7 +594,8 @@ def cloud_upload_local_to_tweet_database(data):
             tweet['retweets'],
             tweet['favorites'],
             str(tweet['mentions']),
-            str(tweet['hashtags'])))
+            str(tweet['hashtags']),
+            tweet['offensive_proba']))
 
         
     # commit changes

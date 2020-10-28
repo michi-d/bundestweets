@@ -33,14 +33,12 @@ def run_bert(data):
     data_formatted = [{'text': v} for v in data['text'].values]
     
     # run model over dataset
-    chunk_size = 64
+    chunk_size = 256
     N_chunks = int(np.ceil(len(data_formatted) / chunk_size))
     results = []
     for c_i in tqdm.tqdm(range(N_chunks)):
         chunk = data_formatted[c_i*chunk_size : (c_i+1)*chunk_size]
         results.extend(model.run_inference(dicts=chunk))
-        if c_i == 1:
-            break
             
     # get probabilities
     bert_proba = []

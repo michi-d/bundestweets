@@ -12,7 +12,6 @@ import sqlite3
 import json
 import bundestweets.bert as bert
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("file", help="Input file to preprocess")
 args = parser.parse_args()
@@ -24,13 +23,15 @@ def main():
     data = stats_helpers.get_raw_data(local=True, db_file=args.file)
     
     # preprocess
+    print('Cleaning and stemming text data...')
     data, translation_set = my_nlp.preprocess_for_nlp(data)
     
     # save translation set
-    with open('bundestweets/data/translation_set.json', 'w+') as fp:
-        json.dump(translation_set, fp)
+    #with open('bundestweets/data/translation_set.json', 'w+') as fp:
+    #    json.dump(translation_set, fp)
         
     # run bert model for offensive language identification
+    print('Running BERT model for offensive language identification...')
     bert_proba = bert.run_bert(data)
     data['offensive_proba'] = bert_proba[:, 1]
     
@@ -49,12 +50,14 @@ def main():
         print('Column "text_cleaned" exists already.')
         
     # update columns "text_stemmed"
+    print("Uploading 'text_stemmed' column...")
     recordList = list(zip(data.text_stemmed, data.id.astype('int')))
     sqlite_update_query = """UPDATE tweets set text_stemmed = ? where id = ?"""
     cur.executemany(sqlite_update_query, recordList)
     conn.commit()
 
     # update columns "text_cleaned"
+    print("Uploading 'text_cleaned' column...")
     recordList = list(zip(data.text_cleaned, data.id.astype('int')))
     sqlite_update_query = """UPDATE tweets set text_cleaned = ? where id = ?"""
     cur.executemany(sqlite_update_query, recordList)
@@ -67,6 +70,7 @@ def main():
         print('Column "offensive_proba" exists already.')
         
     # update columns "offensive_proba"
+    print("Uploading 'offensive_proba' column...")
     recordList = list(zip(data.offensive_proba, data.id.astype('int')))
     sqlite_update_query = """UPDATE tweets set offensive_proba = ? where id = ?"""
     cur.executemany(sqlite_update_query, recordList)

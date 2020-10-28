@@ -56,7 +56,7 @@ def main():
     members_bundestag = pd.DataFrame(members_bundestag).T
   
     # create tweet database
-    helpers.create_tweet_database(filename)
+    helpers.create_tweet_database(filename=filename)
     
     # loop through all members and get all tweets since "since_date"
     print(f'Start scraping from index {start_index}, username: {members_bundestag.iloc[start_index].screen_name}...')
