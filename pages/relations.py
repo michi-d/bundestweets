@@ -13,7 +13,7 @@ import datetime
 
 import bundestweets.helpers as helpers
 import bundestweets.vis_helpers as vis_helpers
-import bundestweets.stats_helpers as stats_helpers
+import bundestweets.stats_helpers as staxts_helpers
 
 # get basic data
 #my_data, content_tweets = vis_helpers.get_data()
@@ -54,7 +54,7 @@ def write(analysis):
     
     # Drop down menu for threhold value
     thr_count = st.selectbox('Display only connections with more replies than ...', 
-                          (3, 5, 10, 15), index=1)
+                          (3, 5, 10, 15), index=2)
 
     ## Get response tweets
     responses_count = vis_helpers.get_responses_count(data_subset)

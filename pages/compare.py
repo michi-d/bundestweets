@@ -37,7 +37,7 @@ def write(analysis):
     st.write("""
     # Compare
     
-    *Compare the Twitter activity between different members of the Bundestag.*
+    *Compare the Twitter activity of different members of the Bundestag.*
     """)
     
     # get mappings between names, parties and indexes

@@ -460,3 +460,60 @@ def get_member_tweets_per_month(member_tweets):
     plot_df.columns = ['date', 'real_name', 'count', 'favorites', 'retweets']
     
     return plot_df
+
+
+@st.cache(show_spinner=False)
+def get_tweets_last_week(data):
+    """Get all tweets from last week. 
+    
+    Args: 
+        data: Tweet dataset
+        
+    Returns:
+        tweets_last_week: Last week's tweets
+    """
+    
+    date_index = pd.DatetimeIndex(data.date)
+    date_index_sorted = date_index.sort_values(ascending=False)
+    
+    mondays = date_index_sorted.weekday == 0
+    last_monday = next((i for i, x in enumerate(mondays) if x), None)
+    end_sunday = date_index_sorted[last_monday].date() - datetime.timedelta(days=1)
+    start_monday = date_index_sorted[last_monday].date() - datetime.timedelta(days=7)
+    mask_last_week = (date_index.date >= start_monday) & (date_index.date <= end_sunday)
+    
+    tweets_last_week = data[mask_last_week]
+    
+    return tweets_last_week
+
+
+@st.cache(show_spinner=False)
+def get_top10_member_stats(tweets_last_week):
+    """Get member-based rankings for last week.
+    
+    Args:
+        tweets_last_week: Last's week twitter data
+        
+    Returns:
+        top10_active: Top 10 w.r.t. tweet count
+        top10_retweets: Top 10 w.r.t. retweets
+        top10_favorites: Top 10 w.r.t. likes
+    """
+    real_name_to_party = dict(zip(tweets_last_week['real_name'], tweets_last_week['party']))
+
+    top10_active = tweets_last_week.groupby('real_name')['id'].count().sort_values(ascending=False)[:10]
+    top10_active = pd.DataFrame(top10_active).reset_index()
+    top10_active['party'] = top10_active['real_name'].apply(lambda row: real_name_to_party[row])
+    top10_active.columns = ['real_name', 'value', 'party']
+
+    top10_retweets = tweets_last_week.groupby('real_name')['retweets'].sum().sort_values(ascending=False)[:10]
+    top10_retweets = pd.DataFrame(top10_retweets).reset_index()
+    top10_retweets['party'] = top10_retweets['real_name'].apply(lambda row: real_name_to_party[row])
+    top10_retweets.columns = ['real_name', 'value', 'party']
+
+    top10_favorites = tweets_last_week.groupby('real_name')['favorites'].sum().sort_values(ascending=False)[:10]
+    top10_favorites = pd.DataFrame(top10_favorites).reset_index()
+    top10_favorites['party'] = top10_favorites['real_name'].apply(lambda row: real_name_to_party[row])
+    top10_favorites.columns = ['real_name', 'value', 'party']
+
+    return top10_active, top10_retweets, top10_favorites

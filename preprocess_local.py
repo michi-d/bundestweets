@@ -21,6 +21,7 @@ def main():
     
     # load data
     data = stats_helpers.get_raw_data(local=True, db_file=args.file)
+    print(f'Pre-processing {len(data)} new tweets.')
     
     # preprocess
     print('Cleaning and stemming text data...')

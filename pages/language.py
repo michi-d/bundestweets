@@ -26,24 +26,28 @@ def write(analysis):
     
     st.write("""
     # Offensive language
+    *Automatically detecting offensive tweets.*
     
-    Offensive and polarizing language is becoming increasingly a problem in online political communication. 
-    How do our elected representatives do with respect to this issue?
+    Offensive and polarizing language is an increasing problem in online political communication. 
+    Let's do the check on our elected representatives!
     
-    We used modern deep neural networks to detect offensive language in tweets. Specifically, 
-    we used a pre-trained language model called *BERT* and retrained it on a publicly available
-    offensive tweet data set (https://projects.fzai.h-da.de/iggsa/).
+    In order for an algorithm to detect whether a tweet is offensive or not, it needs to understand 
+    a lot of the subtleties of written language. To approach this problem, we used a technique called 
+    **transfer learning**: We took a model which had been trained already on some other task in German language 
+    and fine-tuned it on our task. Specifically, we used the so called **BERT language model** and re-trained it on 
+    a different tweet dataset with labeled examples of offensive language. 
+    This training dataset happens to be made publicly
+    available for research purposes already (https://projects.fzai.h-da.de/iggsa/).
+    That way, we could solve this difficult task without having to teach a completely new model the 
+    complex word relationships that exists within any language from scratch. For more technical background, please
+    also have a look at 
+    [this paper](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/2019/risch2019offensive.pdf).
     
-    Before interpreting the results of our analysis it is important to know the limitations of our approach:
-    Classification is often a trade-off between precision and sensitivity. While we want always very precise as
-    well as very sensitive models, it is hard to achieve both at the same time. We demanded of our model to achieve at
-    least 90% precision on a hold-out test dataset. As a trade-off, we accepted a sensitivity of around 30%. 
-    That means, while we are relatively confident for each tweet which is labeled as offensive (although not perfectly sure) 
-    that it indeed contains offensive language, we miss around 70% of all offensive tweets. 
-    
-    For more background on our method, please also have a look at the paper:\n
-    Risch J, Stoll A, Ziegele M, Krestel R. **hpiDEDIS at GermEval 2019: Offensive Language Identification using a German BERT model**. *InKONVENS 2019*.
-
+    On word of caution before looking at the results: Our model achieved 90% precision on a hold-out test set. 
+    This means that, while we are really quite confident that any tweet labeled as offensive indeed contains 
+    offensive language, of course, this is not 100% sure. Also, as a trade-off for achieving that high precision, 
+    we compromised on sensitivity which is only 30%. This means, we expect to miss around 70% of all offensive
+    tweets in our dataset. But better be safe than sorry!
     """)
     
     # Bar chart offensive tweets per party

@@ -28,7 +28,7 @@ def write(analysis):
     tweets from the German Bundestag, would you be able to learn how to tell the author's party affiliation given only
     one of their tweets? Probably not in all cases. 
     But you might recognize certain patterns, certain words and certain topics, 
-    which appear to be unique for each party. You would learn a lot
+    which appear to be unique for each party. You would learn a lot,
     not only about the main political topics of each party, but also about their choice of words and their style of 
     communication!
     
@@ -43,12 +43,12 @@ def write(analysis):
     Brauchen neuen #Gesellschaftsvertrag #CareRevolution_
     
     Could you guess the author's party here? Tweet A is very difficult. But for Tweet B, we could argue (based on
-    our background knowledge) that topics like here for example gender equality and women's rights are probably
-    more indicative for an author belonging to one of the left-wing parties. 
-    This is exactly what our algorithm is trying to do. We don't expect it succeed in all cases since the task is difficult.
-    But it might discover which topics or words are most indicative for which parties.
+    our background knowledge) that topics like gender equality and women's rights are probably
+    more indicative for one of the left-wing parties. 
+    This is exactly what our algorithm is trying to do. We don't expect it to succeed in all cases since the task is difficult.
+    But it might discover which words and topics are most indicative for which parties.
     Rather than solving the party classification task perfectly, we are more 
-    interested what features the machine will learn.
+    interested what decision criteria the algorithm learns given our political tweet dataset.
     
     
     Let's see what we can discover! Train the party classification algorithm for a given time frame and see which words
@@ -56,7 +56,7 @@ def write(analysis):
     """)
 
     # set default start and end times
-    start_datetime = datetime.datetime.strptime('2018/05/01', '%Y/%M/%d')
+    start_datetime = datetime.datetime.strptime('2018/01/01', '%Y/%M/%d')
     end_datetime = datetime.datetime.today()
     
     # select date range widget

@@ -27,17 +27,19 @@ def write(analysis):
     
     We used an unsupervised algorithm called **non-negative matrix factorization (NMF)** to find about this.
     NMF tries to find words which have a high probability of ocurring simultaneously in a document. As it turns out, this
-    is very useful to identify topics in a text dataset because most topics stand out each by their own set of characteristc keywords.
+    is very useful to identify topics in a text dataset because most topics stand out each by their own set of characteristic keywords.
     
-    We applied NMF only on the hashtags which are mentioned in a tweet. We did this because hashtags are actually already quite condensed
+    We applied NMF only on the hashtags in the tweets. We did this because hashtags are actually already quite condensed
     and informative keywords when it comes to political tweets. 
-    On the other hand it is useful to filter out tweets which don't really have a political message (e.g. birthday greetings) because 
-    those messages tend to have less or less informative hashtags.
     
-    In the drop-down menu below you can find the keywords of the topics that NMF could identify in our dataset. You can select topics and we
+    
+    In the drop-down menu below you can find the keywords of the topics that NMF identified. You can select topics and we
     will look up for you how often the corresponding keywords were mentioned over the past years and grouped by month.
     In addition, you can come up with your own set of keywords and see if you can find interesting patterns.
     """)
+    
+#    On the other hand it is useful to filter out tweets which don't really have a political message (e.g. birthday #greetings) because 
+#    those messages tend to have less or less informative hashtags.
     #copy = vis_helpers.reload_nmf_results()
     #for k, v in copy.items():
     #    st.write(f"""Topic {k}: {" ".join(v)}""")

@@ -28,7 +28,7 @@ import pages.relations
 import pages.language
 import pages.content
 import pages.topics
-
+import pages.weekly
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-l', '--local', default=False, action='store_true')
@@ -37,6 +37,7 @@ args = parser.parse_args()
 PAGES = {
     "Start": pages.start,
     "Dataset": pages.dataset,
+    "Weekly report": pages.weekly,
     "Compare members": pages.compare,
     "Content analysis": pages.content,
     "Offensive language": pages.language,
@@ -88,15 +89,15 @@ def main():
 
     st.sidebar.title("About")
     st.sidebar.info(
-        "This an open source project. Source code for app and algorithms are " 
-        "publicly available on "
+        "This an open source project. Source code for the app "
+        "and all analyses is publicly available on "
         "[GitHub](https://github.com/michi-d/bundestweets). "
     )
     st.sidebar.info(
     """
-    This app is maintained by Michael Drews. 
-    For questions, suggestions, ideas or critics please
-    contact me at [michaelsdrews@gmail.com](mailto:michaelsdrews@gmail.com).
+    This page is maintained by Michael Drews. 
+    For questions, inquiries or concerns please contact me at
+    [michaelsdrews@gmail.com](mailto:michaelsdrews@gmail.com).
     """
     )
     
