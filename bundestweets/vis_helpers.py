@@ -517,3 +517,20 @@ def get_top10_member_stats(tweets_last_week):
     top10_favorites.columns = ['real_name', 'value', 'party']
 
     return top10_active, top10_retweets, top10_favorites
+
+
+def get_top3_tweets(tweets_last_week):
+    """Get three most successful tweets
+    
+    Args:
+        tweets_last_week: Last's week twitter data
+        
+    Returns:
+        most_retweets: Top 3 w.r.t. tweet retweets
+        most_likes: Top 3 w.r.t. likes    
+    """
+
+    most_retweets = tweets_last_week.sort_values(by='favorites', ascending=False)[:3]
+    most_likes = tweets_last_week.sort_values(by='retweets', ascending=False)[:3]
+    
+    return most_retweets, most_likes

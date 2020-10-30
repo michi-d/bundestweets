@@ -36,6 +36,8 @@ def write(analysis):
     
     tweets_last_week = vis_helpers.get_tweets_last_week(analysis['my_data'])
     top10_active, top10_retweets, top10_favorites = vis_helpers.get_top10_member_stats(tweets_last_week)
+    top3_most_retweets, top3_most_likes = vis_helpers.get_top3_tweets(tweets_last_week)
+    
     day_begin = tweets_last_week.date.min().strftime('%d.%b')
     day_end = tweets_last_week.date.max().strftime('%d.%b')
     
@@ -74,5 +76,27 @@ def write(analysis):
 
     st.altair_chart(barchart_ranking, use_container_width=True)
 
+   # Top 3 tweets
+    st.write('''
+    ## Top 3 tweets
+    ##
+    ''')
+    plot_top3 = st.selectbox(
+        'Select:',
+         ['Most liked', 
+          'Most retweeted'])
+    if plot_top3 == 'Most retweeted':
+        top3 = top3_most_retweets.sort_values(by='retweets', ascending=False)
+        title = 'retweets'
+        values = top3.retweets.values
+    elif plot_top3 == 'Most liked':
+        top3 = top3_most_likes.sort_values(by='favorites', ascending=False)
+        title = 'likes'
+        values = top3.favorites.values
     
-    
+    for i, (id_, row) in enumerate(top3.sort_values(by='date', ascending=False).iterrows()):
+        st.write(f"""### {values[i]} {title} """)
+        st.write(f"""**{row.real_name}**, {row.party}, {row.date}:""")
+        st.write(f"""{row.text}""")
+        st.write(f"""{row.permalink}""")
+        st.markdown("<hr>", unsafe_allow_html=True)
