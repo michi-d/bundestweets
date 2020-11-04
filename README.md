@@ -4,7 +4,7 @@ Source code for the **Bundestweets** project, a social media explorer for tweets
  
 ## scrape_tweets.py
 
-Simple command-line tool for scraping tweets from the German Bundestag for a side project. 
+Simple command-line tool for scraping tweets from the German Bundestag.
 
 The Twitter API has strict limits on the rate of requests, rendering it difficult to scrape an interesting and large enough dataset for NLP research. Other tools (e.g. https://github.com/bisguzar/twitter-scraper) provide workarounds which avoid interaction with the API by scraping the frontend. These approaches, however, are limited to tweets from within the last 6 or 7 months. 
 
