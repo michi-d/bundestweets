@@ -26,11 +26,13 @@ def write(analysis):
     
     st.write("""
     # Relations
+    *Visualizing Twitter-based communication networks within the Bundestag*
     
-    How often do the delegates interact and respond to each other on Twitter?
+    How often do delegates interact and respond to each other on Twitter?
+    
     Select a time frame and generate a visualization showing the connections
-    which are formed by tweets which are posted in response to other tweets by members of the
-    Bundestag. The lines are coloured by the author of the tweets.
+    which are formed by response tweets between members of the Bundestag. 
+    The lines are coloured by the author of the tweets.
     """)
     
     # set default start and end times
@@ -71,7 +73,7 @@ def write(analysis):
     st.write(render(chord_diagram, backend='bokeh'))
 
     st.write("""
-    ### How does this look like if we group by party and count the responses?
+    ### How often do members of one party interact with members of other parties?
     """)
     ## Party-wise statistics
     for party in vis_helpers.party_cmap.keys():

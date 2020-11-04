@@ -23,16 +23,18 @@ def write(analysis):
     The **Bundestweets** web app is an interactive tool for monitoring and exploring the Twitter activity
     of all members of the German Bundestag. It is based on a dataset comprising all tweets posted by the
     current delegates since the beginning of 2018. So far, we have collected **{N_tweets} tweets** and the dataset
-    is **updated on a daily basis**. Apart from providing weekly and general statistics, the goal of this project
+    is **updated on a daily basis**. Apart from providing weekly reports and general statistics, the goal of this project
     is also to explore how **machine learning** can help reveal interesting patterns in political tweet data.
     We applied different techniques to analyze tweet content, identify most relevant topics, identify offensive 
     language and more. 
-    All analyses presented here are re-computed everyday and therefore always based on the most recent dataset.
+    All analyses presented are recalculated everyday and therefore based on the most recent dataset.
     
     Since this project is work in progress, suggestions, ideas, criticism and questions are always welcome, so please
     feel free to contact:
     
     [michaelsdrews@gmail.com](mailto:michaelsdrews@gmail.com)
+    
+    [LinkedIn](https://www.linkedin.com/in/drews-michael/)
     
     """)
     #html = f"<a href='http://www.google.de'><img src='./pages/bundestweets.png'></a>"

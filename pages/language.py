@@ -26,7 +26,7 @@ def write(analysis):
     
     st.write("""
     # Offensive language
-    *Automatically detecting offensive tweets.*
+    *Automatically detecting offensive tweets*
     
     Offensive and polarizing language is an increasing problem in online political communication. 
     Let's do the check on our elected representatives!
@@ -36,15 +36,15 @@ def write(analysis):
     **transfer learning**: We took a model which had been trained already on some other task in German language 
     and fine-tuned it on our task. Specifically, we used the so called **BERT language model** and re-trained it on 
     a different tweet dataset with labeled examples of offensive language. 
-    This training dataset happens to be made publicly
+    This training dataset happened to be made publicly
     available for research purposes already (https://projects.fzai.h-da.de/iggsa/).
-    That way, we could solve this difficult task without having to teach a completely new model the 
-    complex word relationships that exists within any language from scratch. For more technical background, please
+    In this way, we could solve this difficult task without having to teach a completely new model the 
+    complex word relationships of (German) language from scratch. For more technical background, please
     also have a look at 
     [this paper](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/2019/risch2019offensive.pdf).
     
-    On word of caution before looking at the results: Our model achieved 90% precision on a hold-out test set. 
-    This means that, while we are really quite confident that any tweet labeled as offensive indeed contains 
+    One word of caution before looking at the results: Our model achieved 90% precision on a hold-out test set. 
+    This means that, while we are quite confident that any tweet labeled as offensive indeed contains 
     offensive language, of course, this is not 100% sure. Also, as a trade-off for achieving that high precision, 
     we compromised on sensitivity which is only 30%. This means, we expect to miss around 70% of all offensive
     tweets in our dataset. But better be safe than sorry!
@@ -83,7 +83,7 @@ def write(analysis):
 
     # Responses to other delegates
     st.write('''
-    ### How many offensive tweets are the result of an argument between delegates?
+    ### How many offensive tweets are posted in response to other delegates?
     ''')
     
     plot_data = vis_helpers.get_plot_data_offensive_responding(offensive_tweets)

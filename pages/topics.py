@@ -23,7 +23,7 @@ def write(analysis):
     st.write("""
     # Topic identification
     
-    What do the delegates of the Bundestag tweet about? What topics are most intensively discussed via Twitter? And how does this develop over time?
+    What do the delegates of the Bundestag tweet about? What topics are most intensely discussed on Twitter? And how does this develop over time?
     
     We used an unsupervised algorithm called **non-negative matrix factorization (NMF)** to find about this.
     NMF tries to find words which have a high probability of ocurring simultaneously in a document. As it turns out, this
@@ -34,7 +34,7 @@ def write(analysis):
     
     
     In the drop-down menu below you can find the keywords of the topics that NMF identified. You can select topics and we
-    will look up for you how often the corresponding keywords were mentioned over the past years and grouped by month.
+    will look up for you how often the corresponding keywords were mentioned over the past years.
     In addition, you can come up with your own set of keywords and see if you can find interesting patterns.
     """)
     
