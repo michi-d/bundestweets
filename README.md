@@ -1,8 +1,6 @@
-# bundestweets
+# Bundestweets
 
-An NLP side project focussing on the political tweet landscape of the German Bundestag. Goal is the development of a constantly updated social media monitor for the Bundestag. The project is constantly under development following agile principles, i.e. going through fast and iterative cycles of development and deployment.
-
-Data currently comprises all tweets from delegates of the German Bundestag over the last 2.5 years. For a sneak peek showing some basic statistics about the dataset, please have a look at http://34.107.79.92.
+Source code for the **Bundestweets** project, a social media explorer for tweets from the German Bundestag (Parliament)(www.bundestweets.de).
  
 ## scrape_tweets.py
 
